@@ -111,6 +111,8 @@ sudo ufw allow 8080/tcp comment 'Blynk HTTP'
 sudo ufw allow 9443/tcp comment 'Blynk HTTPS'
 ```
 
+**Note:** When creating a Blynk local server behind a router, it is not necessary to port forward traffic within the server itself. Instead, traffic should be port forwarded from the router to the server, as described [here](#router-settings).
+
 ## Generating SSL Certificates
 Install `certbot`.
 ```
@@ -194,7 +196,7 @@ Insert the following line at the bottom of the file:
 Refer to the relevant section from the blynk-server repository documentation [here](https://github.com/blynkkk/blynk-server#update-instruction-for-unix-like-systems).
 
 ## Router Settings
-Port forward the HTTP (8080) and HTTPS (9443) ports on your router to point towards the server's local IP address.
+Port forward the HTTP (8080) and HTTPS (9443) ports on your router to the respective HTTP and HTTPS ports of your Blynk local server. Your Raspberry Pi should have a static IP address which the router can point to (learn more about setting static IPs [here][8]).
 
 For assistance check [Port Forward][7].
 
@@ -243,7 +245,8 @@ If you continue encountering errors, verify whether your device is capable of us
 3. [Blynk Documentation][3]
 4. [Blynk Forums][7]
 5. [Let's Encrypt Forum | DuckDNS Verification][4] - See post by _jmorahan_ on 01/02/18
-6. [Port Fortward][5]
+6. [Setting Up a Static IP on Raspberry Pi][8]
+7. [Port Fortward][5]
 
 <!-- References -->
 [1]: https://github.com/blynkkk/blynk-server
@@ -253,3 +256,4 @@ If you continue encountering errors, verify whether your device is capable of us
 [5]: https://portforward.com/
 [6]: https://github.com/blynkkk/blynk-library/blob/master/src/BlynkSimpleEsp32_SSL.h
 [7]: https://community.blynk.cc/
+[8]: https://www.raspberrypi.org/learning/networking-lessons/rpi-static-ip-address/
