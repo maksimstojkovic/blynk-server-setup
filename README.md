@@ -1,5 +1,5 @@
 # Blynk Local Server Setup
-This document outlines the procedures for installing a local Blynk server on a Raspberry Pi (Zero) with SSL certificate
+This document outlines the procedures for installing a local Blynk server on a Raspberry Pi (Zero) with SSL certificates.
 
 # Table of Contents
 - [Blynk Local Server Setup](#blynk-local-server-setup)
@@ -11,11 +11,17 @@ This document outlines the procedures for installing a local Blynk server on a R
   - [Firewall Settings](#firewall-settings)
   - [Generating SSL Certificates](#generating-ssl-certificates)
   - [Renewing SSL Certificates](#renewing-ssl-certificates)
+  - [Running the Server](#running-the-server)
+  - [Starting Server on Reboot](#starting-server-on-reboot)
+  - [Updating the Server](#updating-the-server)
   - [Router Settings](#router-settings)
+  - [Sketches With (HTTP) and Without (HTTPS) SSL](#sketches-with-http-and-without-https-ssl)
   - [Useful Links](#useful-links)
 
 ## Pre-Requisites
-Register a DuckDNS account and install in on your server using the documentation available [here](https://www.duckdns.org/install.jsp). Make sure you refer to instructions for the correct operating system.
+You will need a Raspberry Pi device which meets the specifications outlined [here](https://github.com/blynkkk/blynk-server#requirements). A Raspberry Pi Zero W running Raspbian Stretch and an ESP32 Devkit V1 module were used to test the instructions outlined in this document.
+
+Before proceeding, register a DuckDNS account and install it on your server using the documentation available [here](https://www.duckdns.org/install.jsp). Make sure you refer to instructions for the correct operating system.
 
 ## Initial Setup
 Install Java 8 JDK
@@ -74,9 +80,11 @@ allowed.administrator.ips=192.168.1.0/24
 admin.email=<SERVER_ADMIN_EMAIL_HERE>
 admin.pass=<SERVER_ADMIN_PASS_HERE>
 contact.email=<SERVER_ADMIN_EMAIL_HERE>
-server.host=<HOST_ADDRESS_HERE>
+server.host=<DUCKDNS_ADDRESS_HERE>
 ```
 **Note:** `https.port` and `http.port` can be set to any port, but firewall and router settings must match the ports used.
+
+Additional information about the properties listed can be found [here]https://github.com/blynkkk/blynk-server#advanced-local-server-setup).
 
 **Note:** `allowed.administrator.ips` means that accessing the server admin page can only be done within the local network by using the local IP address of the server (e.g. https://192.168.1.x:9443/blynk-login). If the server is not accessible within the local network, you may want to change this to: `0.0.0.0/0`
 
@@ -162,17 +170,80 @@ Change the last line to:
 ```
 **Note:** Certbot randomises the renewal time for certificates to distribute Let's Encrypt server loads.
 
+## Running the Server
+In order for the server to access the SSL certificates generated, the server should be run as root. In the `blynk` directory, execute the following command:
+```
+java -jar server-0.41.2-java8.jar
+```
+**Important:** *Make sure that the name to the server file is correct!*
+
+## Starting Server on Reboot
+As mentioned above, the server must be run with root privileges to access the SSL certificates generated. Thus, to restart the server on boot, a root cronjob is required.
+```
+sudo crontab -e
+```
+Insert the following line at the bottom of the file:
+```
+@reboot java -jar /home/<USERNAME_HERE>/blynk/server-0.41.2-java8.jar &
+```
+**Important:** *Make sure that the path and name of the server file are correct!*
+
+**Note:** The ampersand (&) runs the task in the background, suppressing output.
+
+## Updating the Server
+Refer to the relevant section from the blynk-server repository documentation [here](https://github.com/blynkkk/blynk-server#update-instruction-for-unix-like-systems).
+
 ## Router Settings
 Port forward the HTTP (8080) and HTTPS (9443) ports on your router to point towards the server's local IP address.
 
 For assistance check [Port Forward][7].
 
+## Sketches With (HTTP) and Without (HTTPS) SSL
+To use a SSL hardware connection (HTTPS), ensure that a SSL enabled sketch is being used (e.g. `ESP32_WiFi_SSL.ino`). These sketches include an SSL enabled Blynk library, such as:
+```
+#include <BlynkSimpleEsp32_SSL.h>
+```
+
+Conversely, for hardware connections without SSL (HTTP), use an appropriate sketch (e.g. `ESP32_WiFi.ino`). These sketches include a WiFi Blynk library without SSL, such as:
+```
+#include <BlynkSimpleEsp32.h>
+```
+
+Initialise the variables declared in the example:
+* Auth Token
+* SSID
+* Password
+
+Additionally, declare two more variables as shown below:
+```
+char server[] = "<SERVER_ADDRESS_HERE>";
+int port = <PORT_HERE>;
+```
+For HTTPS connections, the value of server[] should be the same as the DuckDNS address used for the `server.host` property in `server.properties` ([here](#server-properties)). For HTTP connections, use either the server's local network IP address (e.g. `192.168.1.40`) for local connections, or the DuckDNS address. Use the appropriate port value (9443 for HTTPS, and 8080 for HTTP).
+
+**Important:** You <span style="text-decoration:underline">MUST</span> use the DuckDNS address as the server[] value when using SSL. If you do not, the SSL connection will be rejected, giving the following error:
+```
+Connecting to 192.168.1.40:9443
+Secure connection failed
+```
+
+For SSL connections, the following definition is required to change the root certificate authority used by hardware. This definition should be placed at the top of sketch along with other global variables:
+```
+#define BLYNK_SSL_USE_LETSENCRYPT
+```
+For more information, check the [blynk-library Repository][2]. In particular, review the structure of sketches which use SSL, such as [BlynkSimpleEsp32_SSL.h][6]
+
+If you continue encountering errors, verify whether your device is capable of using SSL connections.
+
+**Note:** This has only been tested using the `ESP32_WiFi_SSL.ino` example sketch after following the above server configurations.
+
 ## Useful Links
 1. [blynk-server Repository][1]
-2. [blynk-library Repository][1]
+2. [blynk-library Repository][2]
 3. [Blynk Documentation][3]
-4. [Let's Encrypt Forum - DuckDNS Verification][4] - See post by _jmorahan_ on 01/02/18
-5. [Port Fortward][5]
+4. [Blynk Forums][7]
+5. [Let's Encrypt Forum | DuckDNS Verification][4] - See post by _jmorahan_ on 01/02/18
+6. [Port Fortward][5]
 
 <!-- References -->
 [1]: https://github.com/blynkkk/blynk-server
@@ -180,3 +251,5 @@ For assistance check [Port Forward][7].
 [3]: https://docs.blynk.cc/
 [4]: https://community.letsencrypt.org/t/raspberry-pi-with-duckdns-ddns-failing-to-verify/53567/8
 [5]: https://portforward.com/
+[6]: https://github.com/blynkkk/blynk-library/blob/master/src/BlynkSimpleEsp32_SSL.h
+[7]: https://community.blynk.cc/
