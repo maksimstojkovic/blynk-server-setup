@@ -42,8 +42,8 @@ http.port=18080
 data.folder=/home/<USERNAME_HERE>/blynk/data
 logs.folder=/home/<USERNAME_HERE>/blynk/logs
 log.level=trace
-server.ssl.cert=/etc/letsencrypt/live/<HOST_ADDRESS_HERE>/fullchain.pem
-server.ssl.key=/etc/letsencrypt/live/<HOST_ADDRESS_HERE>/privkey.pem
+server.ssl.cert=/etc/letsencrypt/live/<DUCKDNS_ADDRESS_HERE>/fullchain.pem
+server.ssl.key=/etc/letsencrypt/live/<DUCKDNS_ADDRESS_HERE>/privkey.pem
 server.ssl.key.pass=
 user.dashboard.max.limit=5
 user.message.quota.limit=100
@@ -93,7 +93,27 @@ Create a new `ssl` directory in the same directory as the blynk server jar.
 mkdir ssl
 ```
 
-Inside the `ssl` directory, create two new shell scripts: `auth.sh` and `cleanup.sh`.
+Inside the `ssl` directory, create two new shell scripts as follows:
+
+`auth.sh`
+
+```
+nano auth.sh
+
+#!/bin/bash
+DUCKDNS_TOKEN="<DUCKDNS_TOKEN_HERE>"
+[[ "$(curl -s "https://www.duckdns.org/update?domains=${CERTBOT_DOMAIN%.duckdns.org}&token=${DUCKDNS_TOKEN}&txt=${CERTBOT_VALIDATION}")" = "OK" ]]
+```
+
+`cleanup.sh`.
+
+```
+nano cleanup.sh
+
+#!/bin/bash
+DUCKDNS_TOKEN="<DUCKDNS_TOKEN_HERE>"
+[[ "$(curl -s "https://www.duckdns.org/update?domains=${CERTBOT_DOMAIN%.duckdns.org}&token=${DUCKDNS_TOKEN}&txt=${CERTBOT_VALIDATION}&clear=true")" = "OK" ]]
+```
 
 ## Firewall Settings
 Add `ufw` rules which allow for incoming TCP requests on the HTTP (18080) and HTTPS (19443) ports.
