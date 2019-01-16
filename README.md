@@ -1,10 +1,13 @@
-# Blynk Server Setup
-- [Initial Setup](#initial-setup)
-- [Server Properties](#server-properties)
-- [Mail Properties](#mail-properties)
-- [Generating SSL Certificates](#generating-ssl-certificates)
-- [Firewall Settings](#firewall-settings)
-- [Router Settings](#router-settings)
+# Blynk Local Server Setup
+
+- [Blynk Local Server Setup](#blynk-local-server-setup)
+  - [Initial Setup](#initial-setup)
+  - [Server Properties](#server-properties)
+  - [Mail Properties](#mail-properties)
+  - [Generating SSL Certificates](#generating-ssl-certificates)
+  - [Firewall Settings](#firewall-settings)
+  - [Router Settings](#router-settings)
+  - [Useful Links](#useful-links)
 
 ## Initial Setup
 Install Java 8 JDK
@@ -93,27 +96,42 @@ Create a new `ssl` directory in the same directory as the blynk server jar.
 mkdir ssl
 ```
 
-Inside the `ssl` directory, create two new shell scripts as follows:
-
-`auth.sh`
+Inside the `ssl` directory, create a script called `auth.sh`:
 
 ```
 nano auth.sh
-
+```
+```
 #!/bin/bash
 DUCKDNS_TOKEN="<DUCKDNS_TOKEN_HERE>"
 [[ "$(curl -s "https://www.duckdns.org/update?domains=${CERTBOT_DOMAIN%.duckdns.org}&token=${DUCKDNS_TOKEN}&txt=${CERTBOT_VALIDATION}")" = "OK" ]]
 ```
 
-`cleanup.sh`.
+Inside the `ssl` directory, create another script called `cleanup.sh`:
 
 ```
 nano cleanup.sh
-
+```
+```
 #!/bin/bash
 DUCKDNS_TOKEN="<DUCKDNS_TOKEN_HERE>"
 [[ "$(curl -s "https://www.duckdns.org/update?domains=${CERTBOT_DOMAIN%.duckdns.org}&token=${DUCKDNS_TOKEN}&txt=${CERTBOT_VALIDATION}&clear=true")" = "OK" ]]
 ```
+
+Make both scripts executable
+```
+chmod +x auth.sh cleanup.sh
+```
+
+Run `certbot` in manual mode to generate an SSL certificate for the server. The DNS-01 challenge should be used during this process, along with the scripts that were just created.
+```
+sudo certbot certonly --manual --preferred-challenges dns --manual-auth-hook /path/to/auth.sh --manual-cleanup-hook /path/to/cleanup.sh
+```
+
+**Note:** The paths to `auth.sh` and `cleanup.sh` should be absolute paths.
+
+When prompted, enter the full DuckDNS domain name (e.g. `domain.duckdns.org`). Completing this procedure should yield a certificate and private key in the directory: `/etc/letsencrypt/live/domain.duckdns.org/`. Ensure that the paths to `fullchain.pem` and `privkey.pem` are consistent with the paths in the `server.properties` file.
+
 
 ## Firewall Settings
 Add `ufw` rules which allow for incoming TCP requests on the HTTP (18080) and HTTPS (19443) ports.
@@ -125,11 +143,18 @@ sudo ufw allow 19443/tcp comment 'Blynk HTTPS'
 ## Router Settings
 Port forward the HTTP (18080) and HTTPS (19443) ports on your router to point towards the server's local IP address.
 
-For assistance check [Port Forward][2].
+For assistance check [Port Forward][7].
 
+## Useful Links
+1. [blynk-server Repository][1]
+2. [Blynk Documentation][2]
+3. [Let's Encrypt Forum - DuckDNS Verification][3] - See post by _jmorahan_ on 01/02/18
+4. [Port Fortward][4]
 
 
 
 <!-- References -->
 [1]: https://github.com/blynkkk/blynk-server
-[2]: https://portforward.com/
+[2]: https://docs.blynk.cc/
+[3]: https://community.letsencrypt.org/t/raspberry-pi-with-duckdns-ddns-failing-to-verify/53567/8
+[4]: https://portforward.com/
