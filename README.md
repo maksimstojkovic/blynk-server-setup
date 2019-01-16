@@ -278,27 +278,33 @@ Conversely, for hardware connections without SSL (HTTP), use an appropriate sket
 ```
 
 Initialise the variables declared in the example:
-* Auth Token
-* SSID
-* Password
+* `auth[]` - Auth Token
+* `ssid[]` - SSID
+* `pass[]` - Password
 
 Additionally, declare two more variables as shown below:
 ```
 char server[] = "<SERVER_ADDRESS_HERE>";
 int port = <PORT_HERE>;
 ```
-For HTTPS connections, the value of server[] should be the same as the DuckDNS address used for the `server.host` property in `server.properties` ([here](#server-properties)). For HTTP connections, use either the server's local network IP address (e.g. `192.168.1.40`) for local connections, or the DuckDNS address. Use the appropriate port value (9443 for HTTPS, and 8080 for HTTP).
+For HTTPS connections, the value of `server[]` should be the same as the DuckDNS address used for the `server.host` property in `server.properties` ([here](#server-properties)). For HTTP connections, use either the server's local network IP address (e.g. `192.168.1.40`) for local connections, or the DuckDNS address. Use the appropriate port value (9443 for HTTPS, and 8080 for HTTP).
 
-**Important:** You <span style="text-decoration:underline">MUST</span> use the DuckDNS address as the server[] value when using SSL. If you do not, the SSL connection will be rejected, giving the following error:
+**Important:** You <span style="text-decoration:underline">MUST</span> use the DuckDNS address as the `server[]` value when using SSL. If you do not, the SSL connection will be rejected, giving the following error:
 ```
 Connecting to 192.168.1.40:9443
 Secure connection failed
+```
+
+The `Blynk.begin(...)` call in `setup()` should be modified to the following:
+```
+Blynk.begin(auth, ssid, pass, server, port);
 ```
 
 For SSL connections, the following definition is required to change the root certificate authority used by hardware. This line should be placed at the top of SSL sketches along with other global variables:
 ```
 #define BLYNK_SSL_USE_LETSENCRYPT
 ```
+
 For more information, check the [blynk-library Repository][2]. In particular, review the structure of sketches which use SSL, such as [BlynkSimpleEsp32_SSL.h][6]
 
 If you continue encountering errors, verify whether your device is capable of using SSL connections.
