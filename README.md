@@ -6,7 +6,7 @@ Make sure you understand the terms and conditions of services used to replicate 
 **Warning:** This information may become outdated very quickly.
 
 ## Table of Contents
-- [Blynk Local Server Setup](#blynk-local-server-setup)
+<!-- - [Blynk Local Server Setup](#blynk-local-server-setup) -->
   - [Table of Contents](#table-of-contents)
   - [Pre-Requisites](#pre-requisites)
   - [Initial Setup](#initial-setup)
