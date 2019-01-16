@@ -14,8 +14,6 @@ Make sure you understand the terms and conditions of services used to replicate 
   - [Mail Properties](#mail-properties)
   - [Firewall Settings](#firewall-settings)
   - [Generating SSL Certificates](#generating-ssl-certificates)
-  - [Accept the IP logging notice.](#accept-the-ip-logging-notice)
-  - [Are you OK with your IP being logged?](#are-you-ok-with-your-ip-being-logged)
   - [Renewing SSL Certificates](#renewing-ssl-certificates)
   - [Running the Server](#running-the-server)
   - [Starting Server on Reboot](#starting-server-on-reboot)
@@ -191,6 +189,7 @@ Please enter in your domain name(s) (comma and/or space separated)  (Enter 'c' t
 ```
 
 Accept the IP logging notice.
+```
 -------------------------------------------------------------------------------
 NOTE: The IP of this machine will be publicly logged as having requested this
 certificate. If you're running certbot in manual mode on a machine that is not
@@ -199,6 +198,7 @@ your server, please ensure you're okay with that.
 Are you OK with your IP being logged?
 -------------------------------------------------------------------------------
 (Y)es/(N)o: Y
+```
 
 **Important:** Make sure you read the notes produced during the creation of SSL certificates.
 
@@ -236,7 +236,7 @@ sudo java -jar server-0.41.2-java8.jar
 ```
 **Important:** Make sure that the name to the server file is correct!
 
-Although you will receive `INFO` notices stating `Didn't find Let's Encrypt certificates` and `Automatic certificate generation is turned ON`, the certificates will have been installed correctly as there are no `WARN` notices.
+Although you will receive '`INFO`' notices stating '`Didn't find Let's Encrypt certificates`' and '`Automatic certificate generation is turned ON`', the certificates will have been installed correctly as there are no '`WARN`' notices.
 
 After running the server once until no further notices are printed (`Ctrl+C` to interrupt), check the logs in `blynk/logs/blynk.log` the make sure no errors were encountered.
 
